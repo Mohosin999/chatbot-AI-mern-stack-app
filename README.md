@@ -1,4 +1,4 @@
-# SmartGPT - AI Chatbot & Image Generator
+# AI Chatbot
 
 Chatbot is a full-stack AI platform that leverages Google Gemini to generate intelligent, context-aware responses. Built with React and TailwindCSS on the frontend and Node.js, Express, and MongoDB on the backend, it features a secure authentication system ensuring only registered users can access their chat history, with all conversations stored in their account for future reference.
 
@@ -219,39 +219,39 @@ chatbot/
 
 ### Authentication
 
-| Method | Endpoint              | Description           |
-| ------ | -------------------- | --------------------- |
-| POST   | /api/v1/auth/register | Register new user      |
-| POST   | /api/v1/auth/login   | User login           |
-| POST   | /api/v1/auth/logout  | User logout          |
-| POST   | /api/v1/auth/refresh | Refresh access token |
+| Method | Endpoint              | Description          |
+| ------ | --------------------- | -------------------- |
+| POST   | /api/v1/auth/register | Register new user    |
+| POST   | /api/v1/auth/login    | User login           |
+| POST   | /api/v1/auth/logout   | User logout          |
+| POST   | /api/v1/auth/refresh  | Refresh access token |
 
 ### Chat
 
-| Method | Endpoint          | Description             |
-| ------ | ------------------ | ---------------------- |
-| GET    | /api/v1/chats     | Get all user chats        |
-| POST   | /api/v1/chats     | Create new chat       |
-| GET    | /api/v1/chats/:id | Get single chat     |
-| DELETE | /api/v1/chats/:id | Delete chat         |
+| Method | Endpoint          | Description        |
+| ------ | ----------------- | ------------------ |
+| GET    | /api/v1/chats     | Get all user chats |
+| POST   | /api/v1/chats     | Create new chat    |
+| GET    | /api/v1/chats/:id | Get single chat    |
+| DELETE | /api/v1/chats/:id | Delete chat        |
 
 ### Message
 
-| Method | Endpoint           | Description              |
-| ------ | ------------------ | ------------------------- |
-| POST   | /api/v1/messages   | Send message to AI       |
+| Method | Endpoint         | Description        |
+| ------ | ---------------- | ------------------ |
+| POST   | /api/v1/messages | Send message to AI |
 
 ### Image
 
-| Method | Endpoint          | Description              |
-| ------ | ------------------ | ------------------------- |
-| POST   | /api/v1/images    | Generate AI image        |
+| Method | Endpoint       | Description       |
+| ------ | -------------- | ----------------- |
+| POST   | /api/v1/images | Generate AI image |
 
 ### User
 
-| Method | Endpoint        | Description          |
-| ------ | --------------- | --------------------- |
-| GET    | /api/v1/user    | Get user profile      |
+| Method | Endpoint     | Description      |
+| ------ | ------------ | ---------------- |
+| GET    | /api/v1/user | Get user profile |
 
 ## Contributing
 
