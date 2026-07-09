@@ -126,23 +126,6 @@ const Sidebar = ({ handleSidebarClose }) => {
       const chatData = res.payload.data;
       await dispatch(getChatById(chatData.id));
       dispatch(addChatToAllChats(chatData));
-
-      const firstMessageText =
-        chatData.messages?.[0]?.content || "Untitled Chat";
-
-      dispatch(
-        updateChatName({ chatId: chatData.id, chatName: firstMessageText })
-      );
-
-      try {
-        await axios.patch(
-          `${import.meta.env.VITE_BASE_URL}/chats/${chatData.id}`,
-          { name: firstMessageText },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      } catch (err) {
-        console.error("Failed to persist chat name:", err);
-      }
     }
   };
 
@@ -169,12 +152,6 @@ const Sidebar = ({ handleSidebarClose }) => {
 
     if (res.meta.requestStatus === "fulfilled") {
       toast.success("Chat deleted");
-      if (currentChat?.data?.id === chatId) {
-        const remainingChats = allChats?.data?.filter((c) => c.id !== chatId);
-        if (remainingChats?.length > 0) {
-          dispatch(getChatById(remainingChats[0].id));
-        }
-      }
     }
   };
 

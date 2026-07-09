@@ -114,7 +114,7 @@ const ChatInput = forwardRef(({ onSend }, ref) => {
       </div>
 
       {/* Local animation style */}
-      <style jsx>{`
+      <style>{`
         @keyframes fade-up {
           from {
             opacity: 0;

@@ -282,11 +282,8 @@ const chatSlice = createSlice({
         state.isGenerating = true;
         state.error = null;
       })
-      .addCase(createMessage.fulfilled, (state, action) => {
+      .addCase(createMessage.fulfilled, (state) => {
         state.isGenerating = false;
-        if (!state.currentChat?.data?.messages)
-          state.currentChat.data.messages = [];
-        state.currentChat.data.messages.push(action.payload);
         state.error = null;
       })
       .addCase(createMessage.rejected, (state, action) => {

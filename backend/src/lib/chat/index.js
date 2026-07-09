@@ -68,9 +68,20 @@ const removeChat = async (id) => {
   return Chat.findByIdAndDelete(id);
 };
 
+const updateChat = async (id, data) => {
+  const chat = await Chat.findById(id);
+  if (!chat) {
+    throw notFound();
+  }
+
+  const updatedChat = await Chat.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true });
+  return updatedChat;
+};
+
 module.exports = {
   createChat,
   findAll,
   findChatById,
   removeChat,
+  updateChat,
 };

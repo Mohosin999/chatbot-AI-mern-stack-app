@@ -26,6 +26,7 @@ router
 router
   .route("/api/v1/chats/:id")
   .get(authenticate, chatController.findSingleItem)
+  .patch(authenticate, chatController.updateItem)
   .delete(authenticate, chatController.removeItem);
 
 // Message routes
