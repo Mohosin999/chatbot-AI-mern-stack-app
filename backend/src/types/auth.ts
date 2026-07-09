@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 export interface ITokenPayload {
   id: string;
   name: string;
@@ -16,9 +14,3 @@ export interface IAuthResponse {
   accessToken: string;
   refreshToken: string;
 }
-
-export const refreshTokenSchema = z.object({
-  refresh_token: z.string().min(1),
-});
-
-export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;

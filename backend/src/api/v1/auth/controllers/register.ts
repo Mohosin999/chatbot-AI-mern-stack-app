@@ -5,7 +5,7 @@ import {
   generateRefreshToken,
 } from "../../../../lib/token";
 import User from "../../../../model/User";
-import { registerSchema } from "../../../../types";
+import { registerSchema } from "../../../../validator/auth";
 
 const register = async (
   req: Request,

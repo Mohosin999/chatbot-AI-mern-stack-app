@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { createMessage } from "../../../../lib/message";
-import { createMessageSchema } from "../../../../types";
+import { createMessageSchema } from "../../../../validator/chat";
 
 const create = async (
   req: Request,

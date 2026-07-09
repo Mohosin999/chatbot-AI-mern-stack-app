@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as authService from "../../../../lib/auth";
-import { loginSchema } from "../../../../types";
+import { loginSchema } from "../../../../validator/auth";
 
 const login = async (
   req: Request,
