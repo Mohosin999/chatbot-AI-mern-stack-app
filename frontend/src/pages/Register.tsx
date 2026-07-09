@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -29,13 +28,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const registerSchema = z.object({
-  name: z.string().min(3, "Name must be at least 3 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
+import { registerSchema, type RegisterFormData } from "@/validator/auth";
 
 const Register = () => {
   const dispatch = useDispatch();
@@ -44,7 +37,7 @@ const Register = () => {
 
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  const form = useForm<RegisterFormValues>({
+  const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: { name: "", email: "", password: "" },
   });
@@ -65,7 +58,7 @@ const Register = () => {
   }, [user, error, form, navigate, dispatch]);
 
   const handleRegister = useCallback(
-    (values: RegisterFormValues) => {
+    (values: RegisterFormData) => {
       dispatch(registerUser(values) as any);
     },
     [dispatch]
