@@ -20,6 +20,10 @@ const App = () => {
         <Route path="/loading" element={<Loading />} />
         <Route path="*" element={<Loading />} />
       </Routes>
+
+      <div>
+        <h1>Welcome to My App</h1>
+      </div>
     </div>
   );
 };
