@@ -19,7 +19,7 @@ const streamCreate = async (
     return;
   }
 
-  const { chatId, prompt } = parsed.data;
+  const { chatId, prompt, files } = parsed.data;
 
   const abortController = new AbortController();
   const signal = abortController.signal;
@@ -38,6 +38,7 @@ const streamCreate = async (
       userId,
       chatId,
       prompt,
+      files,
       signal,
     });
 

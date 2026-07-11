@@ -600,7 +600,7 @@ export const deleteChatById = createAsyncThunk(
 export const createMessageStream = createAsyncThunk(
   "chat/createMessageStream",
   async (
-    messageData: { prompt: string; chatId: string },
+    messageData: { prompt: string; chatId: string; files?: { name: string; mimeType: string; data: string }[] },
     { dispatch, rejectWithValue },
   ) => {
     // Initialize abort controller for stream cancellation

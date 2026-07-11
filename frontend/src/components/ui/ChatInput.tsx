@@ -3,22 +3,36 @@ import React, {
   useImperativeHandle,
   forwardRef,
   useRef,
+  useCallback,
 } from "react";
-import { FaCircleArrowRight } from "react-icons/fa6";
+import { FaCircleArrowRight, FaPlus, FaFilePdf, FaXmark } from "react-icons/fa6";
 
 export interface ChatInputHandle {
   focus: () => void;
 }
 
+interface SelectedFile {
+  id: string;
+  name: string;
+  mimeType: string;
+  data: string;
+  preview: string;
+}
+
 interface ChatInputProps {
-  onSend: (text: string) => void;
+  onSend: (text: string, files?: Omit<SelectedFile, "preview" | "id">[]) => void;
   isStreaming?: boolean;
   onStop?: () => void;
 }
 
+const ACCEPTED_TYPES = "image/png,image/jpeg,image/webp,image/heic,image/heif,application/pdf";
+const MAX_FILES = 5;
+
 const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(({ onSend, isStreaming, onStop }, ref) => {
   const [value, setValue] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const token = localStorage.getItem("accessToken") || "";
 
   const adjustHeight = () => {
@@ -33,12 +47,52 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(({ onSend, isStrea
     adjustHeight();
   };
 
+  const readFile = (file: File): Promise<SelectedFile> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        const raw = result.split(",")[1];
+        resolve({
+          id: crypto.randomUUID(),
+          name: file.name,
+          mimeType: file.type,
+          data: raw,
+          preview: result,
+        });
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const handleFilePick = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const remaining = MAX_FILES - selectedFiles.length;
+    const toAdd = files.slice(0, remaining);
+    const read = await Promise.all(toAdd.map(readFile));
+    setSelectedFiles((prev) => [...prev, ...read]);
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [selectedFiles.length]);
+
+  const removeFile = (id: string) => {
+    setSelectedFiles((prev) => prev.filter((f) => f.id !== id));
+  };
+
   const sendMessage = () => {
     const text = value.trim();
-    if (!text) return;
-    if (typeof onSend === "function") onSend(text);
+    if (!text && !selectedFiles.length) return;
+
+    const files = selectedFiles.length
+      ? selectedFiles.map((f) => ({ name: f.name, mimeType: f.mimeType, data: f.data }))
+      : undefined;
+
+    onSend(text, files);
 
     setValue("");
+    setSelectedFiles([]);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
   };
 
@@ -53,22 +107,97 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(({ onSend, isStrea
     focus: () => textareaRef.current?.focus(),
   }));
 
+  const canSend = (value.trim().length > 0 || selectedFiles.length > 0) && token;
+
   return (
     <div className="w-full px-4 md:px-0 flex flex-col items-center">
       <div className="relative w-full rounded-xl border border-gray-300 bg-white dark:bg-[#303030] dark:border-[#303030] shadow-md group">
-        <textarea
-          ref={textareaRef}
-          value={value}
-          onChange={handleInput}
-          onInput={adjustHeight}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask without limits..."
-          rows={1}
-          disabled={!token}
-          className={`w-full resize-none overflow-hidden rounded-xl bg-transparent px-4 py-3 pr-14 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-0 transition-all duration-150 max-h-60 ${
-            !token ? "cursor-not-allowed opacity-50 select-none" : ""
-          }`}
-        />
+
+        {selectedFiles.length > 0 && (
+          <div className="flex flex-wrap gap-2 px-3 pt-3 pb-1">
+            {selectedFiles.map((file) => (
+              <div
+                key={file.id}
+                className="relative group/file flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-[#3a3a3a] px-2 py-1.5 pr-7 text-xs"
+              >
+                {file.mimeType === "application/pdf" ? (
+                  <FaFilePdf className="text-red-500 shrink-0" size={14} />
+                ) : (
+                  <img
+                    src={file.preview}
+                    alt={file.name}
+                    className="h-6 w-6 rounded object-cover shrink-0"
+                  />
+                )}
+                <span className="max-w-24 truncate text-gray-700 dark:text-gray-300">
+                  {file.name}
+                </span>
+                <button
+                  onClick={() => removeFile(file.id)}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 hidden group-hover/file:flex items-center justify-center h-4 w-4 rounded-full bg-gray-400 hover:bg-gray-500 text-white"
+                >
+                  <FaXmark size={8} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={!token || selectedFiles.length >= MAX_FILES}
+            className={`shrink-0 flex items-center justify-center h-9 w-9 ml-2 rounded-lg transition-all ${
+              !token || selectedFiles.length >= MAX_FILES
+                ? "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+                : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3a3a] cursor-pointer"
+            }`}
+            title={selectedFiles.length >= MAX_FILES ? `Max ${MAX_FILES} files` : "Attach files"}
+          >
+            <FaPlus size={14} />
+          </button>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ACCEPTED_TYPES}
+            multiple
+            onChange={handleFilePick}
+            className="hidden"
+          />
+
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={handleInput}
+            onInput={adjustHeight}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask without limits..."
+            rows={1}
+            disabled={!token}
+            className={`flex-1 resize-none overflow-hidden rounded-xl bg-transparent px-2 py-3 pr-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-0 transition-all duration-150 max-h-60 ${
+              !token ? "cursor-not-allowed opacity-50 select-none" : ""
+            }`}
+          />
+
+          <div className="shrink-0 pr-2">
+            {isStreaming ? (
+              <button
+                onClick={onStop}
+                className="h-8 w-8 flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 active:scale-95 transition-all cursor-pointer"
+              >
+                <span className="text-sm font-bold text-gray-700 dark:text-gray-200">■</span>
+              </button>
+            ) : canSend ? (
+              <FaCircleArrowRight
+                onClick={sendMessage}
+                className="h-7 w-7 cursor-pointer active:scale-105 transition-transform duration-150 text-gray-900 dark:text-gray-100 hover:text-gray-800 hover:dark:text-gray-300"
+              />
+            ) : (
+              <div className="h-8 w-8" />
+            )}
+          </div>
+        </div>
 
         {!token && (
           <div className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 -translate-y-full mb-2 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out">
@@ -77,36 +206,12 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(({ onSend, isStrea
             </div>
           </div>
         )}
-
-        <div className="absolute right-2 top-1/2 -translate-y-1/2">
-          {isStreaming ? (
-            <button
-              onClick={onStop}
-              className="h-8 w-8 flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 active:scale-95 transition-all cursor-pointer"
-            >
-              <span className="text-sm font-bold text-gray-700 dark:text-gray-200">■</span>
-            </button>
-          ) : value.trim().length > 0 && token ? (
-            <FaCircleArrowRight
-              onClick={sendMessage}
-              className="h-7 w-7 cursor-pointer active:scale-105 transition-transform duration-150 text-gray-900 dark:text-gray-100 hover:text-gray-800 hover:dark:text-gray-300"
-            />
-          ) : (
-            <div className="h-10 w-10" />
-          )}
-        </div>
       </div>
 
       <style>{`
         @keyframes fade-up {
-          from {
-            opacity: 0;
-            transform: translate(-50%, -10px);
-          }
-          to {
-            opacity: 1;
-            transform: translate(-50%, 0);
-          }
+          from { opacity: 0; transform: translate(-50%, -10px); }
+          to { opacity: 1; transform: translate(-50%, 0); }
         }
         .animate-fade-up {
           animation: fade-up 0.25s ease-out forwards;

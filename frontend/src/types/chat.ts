@@ -1,3 +1,9 @@
+export interface FileData {
+  mimeType: string;
+  data?: string;
+  name: string;
+}
+
 export interface Message {
   id: string | number;
   role: "user" | "assistant";
@@ -7,6 +13,7 @@ export interface Message {
   isStreaming?: boolean;
   isImage?: boolean;
   chatName?: string;
+  files?: { mimeType: string; name: string; data?: string }[];
 }
 
 export interface ChatData {

@@ -83,8 +83,9 @@ const ContentArea = () => {
     }
   }, [accessToken, currentChat?.data?.messages, isGenerating]);
 
-  const handleSend = async (text: string) => {
-    if (!accessToken || !text.trim()) return;
+  const handleSend = async (text: string, files?: { name: string; mimeType: string; data: string }[]) => {
+    if (!accessToken) return;
+    if (!text.trim() && (!files || !files.length)) return;
 
     const existingChatId = currentChat?.data?.id;
     let currentChatId = existingChatId;
@@ -100,13 +101,17 @@ const ContentArea = () => {
       await dispatch(getChatById(currentChatId) as any);
     }
 
-    dispatch(
-      addTempMessage({
-        id: Date.now(),
-        role: "user",
-        content: text,
-      }),
-    );
+    const userMsg: Record<string, unknown> = {
+      id: Date.now(),
+      role: "user",
+      content: text,
+    };
+
+    if (files && files.length > 0) {
+      userMsg.files = files.map((f) => ({ name: f.name, mimeType: f.mimeType, data: f.data }));
+    }
+
+    dispatch(addTempMessage(userMsg));
 
     dispatch(
       addTempMessage({
@@ -122,6 +127,7 @@ const ContentArea = () => {
       createMessageStream({
         prompt: text.trim(),
         chatId: currentChatId!,
+        files,
       }) as any,
     );
 
