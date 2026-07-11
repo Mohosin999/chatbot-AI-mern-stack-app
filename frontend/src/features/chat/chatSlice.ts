@@ -945,7 +945,12 @@ const chatSlice = createSlice({
       .addCase(createImage.rejected, (state, action) => {
         state.isGenerating = false;
         state.error = action.payload as string;
-      });
+      })
+      .addMatcher(
+        (action) =>
+          ["auth/logoutUser/fulfilled", "auth/loginUser/fulfilled", "auth/registerUser/fulfilled", "auth/googleLogin/fulfilled"].includes(action.type),
+        () => initialState,
+      );
   },
 });
 

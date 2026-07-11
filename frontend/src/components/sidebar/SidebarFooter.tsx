@@ -76,7 +76,7 @@ const SidebarFooter = ({ token, onLogout, onLogin }: SidebarFooterProps) => {
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <h2 className="text-sm font-medium text-white truncate max-w-[120px]">
+              <h2 className="text-sm font-medium text-white">
                 {loading ? "Loading..." : profile?.name || "User"}
               </h2>
 

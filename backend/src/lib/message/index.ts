@@ -82,16 +82,14 @@ import { notFound } from "../../utils/error";
 
 const generateChatTitle = async (
   userPrompt: string,
-  assistantResponse: string,
 ): Promise<string> => {
   const titleModel = genAI.getGenerativeModel({
     model: "gemini-2.5-flash",
   });
 
-  const prompt = `Based on this conversation, generate a concise chat title (3 words) that summarizes the main topic. Do not use quotation marks, punctuation, or emojis. Return only the title as plain text.
+  const prompt = `Generate a concise chat title (3 words) that summarizes the main topic of this message. Do not use quotation marks, punctuation, or emojis. Return only the title as plain text.
 
-User: ${userPrompt}
-Assistant: ${assistantResponse}`;
+${userPrompt}`;
 
   const result = await titleModel.generateContent(prompt);
   return result.response.text().trim();
@@ -127,6 +125,16 @@ const streamMessage = async ({
 
   let fullText = "";
 
+  const needsTitle =
+    !chat.name || /^(new chat|untitled)/i.test(chat.name.trim());
+
+  const titlePromise = needsTitle
+    ? generateChatTitle(prompt).catch((err) => {
+        console.error("Failed to generate chat title:", (err as Error).message);
+        return null;
+      })
+    : Promise.resolve(null);
+
   const stream = (async function* () {
     for await (const chunk of result.stream) {
       if (signal?.aborted) break;
@@ -145,20 +153,10 @@ const streamMessage = async ({
 
     chat.messages.push(reply as any);
 
-    // Generate a chat title if the current name is default or empty
-    const needsTitle =
-      !chat.name || /^(new chat|untitled)/i.test(chat.name.trim());
-
-    if (needsTitle) {
-      try {
-        const generatedTitle = await generateChatTitle(prompt, fullText);
-        if (generatedTitle) {
-          chat.name = generatedTitle;
-          reply.chatName = generatedTitle;
-        }
-      } catch (err) {
-        console.error("Failed to generate chat title:", (err as Error).message);
-      }
+    const generatedTitle = await titlePromise;
+    if (generatedTitle) {
+      chat.name = generatedTitle;
+      reply.chatName = generatedTitle;
     }
 
     await chat.save();

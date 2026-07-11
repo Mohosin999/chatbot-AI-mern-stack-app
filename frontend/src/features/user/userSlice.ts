@@ -53,7 +53,12 @@ const userSlice = createSlice({
         state.loading = false;
         state.profile = null;
         state.error = action.payload as string;
-      });
+      })
+      .addMatcher(
+        (action) =>
+          ["auth/logoutUser/fulfilled", "auth/loginUser/fulfilled", "auth/registerUser/fulfilled", "auth/googleLogin/fulfilled"].includes(action.type),
+        () => initialState,
+      );
   },
 });
 
