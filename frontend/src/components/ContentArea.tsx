@@ -13,9 +13,16 @@ import {
 } from "@/features/chat/chatSlice";
 import { useAppSelector } from "@/hooks/useAppStore";
 import type { Message as MessageType } from "@/types";
+import toast from "react-hot-toast";
 
 const ContentArea = () => {
-  const { currentChat, isGenerating } = useAppSelector((state) => state.chat);
+  const { currentChat, isGenerating, error } = useAppSelector((state) => state.chat);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error, { duration: 5000 });
+    }
+  }, [error]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<ChatInputHandle>(null);

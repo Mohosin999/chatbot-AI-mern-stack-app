@@ -15,6 +15,8 @@ export interface IChatDocument extends Document {
   userName: string;
   name: string;
   messages: IMessageDocument[];
+  summary?: string;
+  summaryUpdatedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -31,6 +33,8 @@ const chatSchema = new Schema<IChatDocument>(
         timestamp: { type: Number, required: true },
       },
     ],
+    summary: { type: String },
+    summaryUpdatedAt: { type: Date },
   },
   { timestamps: true }
 );

@@ -56,8 +56,15 @@ const streamCreate = async (
     }
   } catch (error) {
     if ((error as Error).name === "AbortError") return;
-    const message = error instanceof Error ? error.message : "Stream failed";
-    res.write(`data: ${JSON.stringify({ error: message })}\n\n`);
+    const errorMessage = error instanceof Error ? error.message : "Stream failed";
+    const isQuota = errorMessage.includes("429") || errorMessage.includes("quota") || errorMessage.includes("Quota");
+    const friendlyMessage = isQuota
+      ? "AI service quota exceeded. Please wait a moment and try again."
+      : errorMessage.length > 200
+        ? errorMessage.slice(0, 200) + "..."
+        : errorMessage;
+    console.error("[Stream] Error:", friendlyMessage);
+    res.write(`data: ${JSON.stringify({ error: friendlyMessage })}\n\n`);
     res.end();
   }
 };

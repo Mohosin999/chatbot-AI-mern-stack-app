@@ -15,16 +15,17 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { IoMdLogIn } from "react-icons/io";
-import { LogOut } from "lucide-react";
+import { BarChart3, LogOut } from "lucide-react";
 import { Switch } from "../ui/switch";
 
 interface SidebarFooterProps {
   token: string;
   onLogout: () => void;
   onLogin: () => void;
+  onOpenContext?: () => void;
 }
 
-const SidebarFooter = ({ token, onLogout, onLogin }: SidebarFooterProps) => {
+const SidebarFooter = ({ token, onLogout, onLogin, onOpenContext }: SidebarFooterProps) => {
   const [alertOpen, setAlertOpen] = useState(false);
   const dispatch = useDispatch();
 
@@ -53,6 +54,17 @@ const SidebarFooter = ({ token, onLogout, onLogin }: SidebarFooterProps) => {
 
   return (
     <div className="flex flex-col gap-2 border-t border-gray-700">
+      {token && (
+        <div className="flex items-center gap-2 mt-2">
+          <button
+            onClick={onOpenContext}
+            className="flex-1 flex items-center justify-center gap-1.5 p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition text-sm text-gray-300 hover:text-white"
+          >
+            <BarChart3 size={16} className="text-purple-400" /> Context
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mt-2 p-2 bg-gray-800 dark:bg-gray-700 rounded-lg shadow-sm transition-colors duration-300">
         <span className="text-sm font-semibold text-[#48A4FF]">
           {theme === "light" ? "Dark Theme" : "Light Theme"}
