@@ -92,7 +92,7 @@ const googleLogin = async ({ credential }: { credential: string }) => {
     email: user.email,
   };
 
-  const accessToken = generateAccessToken({ payload: tokenPayload });
+  const ourAccessToken = generateAccessToken({ payload: tokenPayload });
   const { refreshToken, expiresAt } = generateRefreshToken();
 
   await User.findByIdAndUpdate(user.id, {
@@ -100,7 +100,7 @@ const googleLogin = async ({ credential }: { credential: string }) => {
     refreshTokenExpiresAt: expiresAt,
   });
 
-  return { accessToken, refreshToken };
+  return { accessToken: ourAccessToken, refreshToken };
 };
 
 export { register, login, googleLogin };

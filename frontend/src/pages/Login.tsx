@@ -1,25 +1,23 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Bot } from "lucide-react";
 
 import { GoogleLogin } from "@react-oauth/google";
-import { clearError, loginUser, googleLogin } from "@/features/auth/authSlice";
+import {
+  clearError,
+  loginUser,
+  registerUser,
+  googleLogin,
+} from "@/features/auth/authSlice";
 import { useAppSelector } from "@/hooks/useAppStore";
 
+import Plans from "@/components/Plans";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -29,155 +27,323 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { loginSchema, type LoginFormData } from "@/validator/auth";
+import {
+  loginSchema,
+  registerSchema,
+  type LoginFormData,
+  type RegisterFormData,
+} from "@/validator/auth";
+
+type AuthMode = "login" | "register";
+
+interface MergedFormData {
+  name?: string;
+  email: string;
+  password: string;
+}
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, error, loading } = useAppSelector((state) => state.auth);
 
-  const emailInputRef = useRef<HTMLInputElement>(null);
+  const [mode, setMode] = useState<AuthMode>(
+    (searchParams.get("mode") as AuthMode) || "login",
+  );
 
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+  const images = ["/img/one.jpg", "/img/three.jpg"];
+
+  const [currentImage, setCurrentImage] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % images.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formRef = useRef<HTMLDivElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+
+  const resolver = useCallback((data: MergedFormData) => {
+    const schema = modeRef.current === "login" ? loginSchema : registerSchema;
+    const result = schema.safeParse(data);
+    if (result.success) {
+      return { values: result.data as MergedFormData, errors: {} };
+    }
+    const errors: Record<string, { message: string; type: string }> = {};
+    for (const issue of result.error.issues) {
+      if (issue.path.length > 0) {
+        errors[issue.path[0] as string] = {
+          message: issue.message,
+          type: issue.code,
+        };
+      }
+    }
+    return { values: {}, errors };
+  }, []);
+
+  const form = useForm<MergedFormData>({
+    resolver,
+    defaultValues: { name: "", email: "", password: "" },
   });
 
   useEffect(() => {
-    emailInputRef.current?.focus();
-  }, []);
+    form.clearErrors();
+    const input =
+      mode === "login" ? emailInputRef.current : nameInputRef.current;
+    input?.focus();
+  }, [mode, form]);
 
   useEffect(() => {
     if (user) {
-      toast.success("Login successful");
+      toast.success(
+        mode === "login" ? "Login successful" : "Registration successful",
+      );
       form.reset();
       navigate("/loading");
     } else if (error) {
-      toast.error("Invalid credentials");
+      toast.error(error);
       dispatch(clearError());
     }
-  }, [user, error, form, navigate, dispatch]);
+  }, [user, error, form, navigate, dispatch, mode]);
 
-  const handleLogin = useCallback(
-    (values: LoginFormData) => {
-      dispatch(loginUser(values) as any);
+  const handleSubmit = useCallback(
+    (values: MergedFormData) => {
+      if (mode === "login") {
+        dispatch(loginUser(values as LoginFormData) as any);
+      } else {
+        dispatch(registerUser(values as RegisterFormData) as any);
+      }
     },
-    [dispatch]
+    [dispatch, mode],
   );
 
-  const handleNavigateRegister = useCallback(() => {
-    navigate("/register");
-  }, [navigate]);
+  const scrollToForm = () => {
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setTimeout(() => {
+      (mode === "login"
+        ? emailInputRef.current
+        : nameInputRef.current
+      )?.focus();
+    }, 500);
+  };
+
+  const switchMode = (newMode: AuthMode) => {
+    setMode(newMode);
+    dispatch(clearError());
+    form.clearErrors();
+  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#181818]">
-      <Card className="w-full max-w-sm shadow-lg">
-        <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
-            Enter your email and password to continue
-          </CardDescription>
-        </CardHeader>
+    <div className="bg-[#121212]">
+      {/* Hero Section */}
+      <div className="w-full min-h-screen flex flex-col lg:flex-row items-center lg:px-12">
+        {/* Left - Circular Brand with Image Carousel */}
+        <div className="lg:w-1/2 flex items-center justify-center p-6 lg:p-8 w-full">
+          <div className="relative w-[min(70vw,600px)] aspect-square rounded-full overflow-hidden shadow-2xl shadow-black/40">
+            {images.map((src, index) => (
+              <div
+                key={src}
+                className="absolute inset-0 transition-opacity duration-1000"
+                style={{ opacity: index === currentImage ? 1 : 0 }}
+              >
+                <img src={src} alt="" className="w-full h-full object-cover" />
+              </div>
+            ))}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/70" />
+          </div>
+        </div>
 
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleLogin)}
-              className="flex flex-col gap-6"
-              noValidate
-            >
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        ref={emailInputRef}
-                        type="email"
-                        autoComplete="email"
-                        placeholder="johndoe@example.com"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+        {/* Right - Form */}
+        <div className="lg:w-1/2 flex items-center justify-center p-6 lg:p-28">
+          <div ref={formRef} className="w-full">
+            <div className="flex lg:hidden items-center gap-2 mb-8">
+              <div className="w-9 h-9 bg-gradient-to-br from-blue-400 to-cyan-300 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-lg font-bold text-white">SmartChat</span>
+            </div>
+
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2">
+                {mode === "login" ? "Welcome back" : "Create account"}
+              </h2>
+              <p className="text-gray-400">
+                {mode === "login"
+                  ? "Sign in to continue to SmartChat"
+                  : "Sign up to get started with SmartChat"}
+              </p>
+            </div>
+
+            {/* ==================================================
+                                 Form
+             ===================================================*/}
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(handleSubmit)}
+                className="flex flex-col gap-5"
+                noValidate
+              >
+                {mode === "register" && (
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-300 text-sm">
+                          Name
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            ref={nameInputRef}
+                            value={field.value ?? ""}
+                            type="text"
+                            autoComplete="name"
+                            placeholder="John Doe"
+                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-none focus:ring-blue-500/20 h-11"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    )}
+                  />
                 )}
-              />
 
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="password"
-                        autoComplete="current-password"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-300 text-sm">
+                        Email
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          ref={mode === "login" ? emailInputRef : undefined}
+                          value={field.value ?? ""}
+                          type="email"
+                          autoComplete="email"
+                          placeholder="johndoe@example.com"
+                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-none focus:ring-blue-500/20 h-11"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
 
-              <CardFooter className="flex flex-col gap-2">
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-300 text-sm">
+                        Password
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value ?? ""}
+                          type="password"
+                          autoComplete={
+                            mode === "login"
+                              ? "current-password"
+                              : "new-password"
+                          }
+                          placeholder="••••••••"
+                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-none focus:ring-blue-500/20 h-11"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
+
                 <Button
                   type="submit"
-                  className="w-full cursor-pointer"
+                  className="w-full cursor-pointer bg-white hover:bg-white/80 text-gray-900 font-medium py-2.5 h-11 rounded-lg transition-all duration-200"
                   disabled={loading}
                 >
                   {loading ? (
                     <LoaderCircle className="w-5 h-5 animate-spin" />
+                  ) : mode === "login" ? (
+                    "Sign In"
                   ) : (
-                    "Login"
+                    "Create Account"
                   )}
                 </Button>
-                <p className="text-center text-sm text-muted-foreground">
+              </form>
+            </Form>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-white/10" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-[#0a0a0a] px-3 text-gray-500">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            {/* ==================================================
+                               Google Login Button
+             ===================================================*/}
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={(credentialResponse) => {
+                  if (credentialResponse.credential) {
+                    dispatch(googleLogin(credentialResponse.credential) as any);
+                  }
+                }}
+                onError={() => {
+                  toast.error("Google login failed");
+                }}
+                size="large"
+                shape="rectangular"
+                width="100%"
+                theme="filled_black"
+                text={mode === "login" ? "signin_with" : "signup_with"}
+              />
+            </div>
+
+            <p className="text-center text-sm text-gray-500 mt-6">
+              {mode === "login" ? (
+                <>
                   Don't have an account?{" "}
                   <button
                     type="button"
-                    className="text-blue-500 hover:underline active:scale-95 transition cursor-pointer"
-                    onClick={handleNavigateRegister}
+                    onClick={() => switchMode("register")}
+                    className="text-blue-400 hover:text-blue-300 hover:underline transition cursor-pointer"
                   >
-                    Register
+                    Sign up
                   </button>
-                </p>
-              </CardFooter>
-            </form>
-          </Form>
-
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
+                </>
+              ) : (
+                <>
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => switchMode("login")}
+                    className="text-blue-400 hover:text-blue-300 hover:underline transition cursor-pointer"
+                  >
+                    Sign in
+                  </button>
+                </>
+              )}
+            </p>
           </div>
+        </div>
+      </div>
 
-          <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={(credentialResponse) => {
-                if (credentialResponse.credential) {
-                  dispatch(googleLogin(credentialResponse.credential) as any);
-                }
-              }}
-              onError={() => {
-                toast.error("Google login failed");
-              }}
-              size="large"
-              shape="rectangular"
-              width="100%"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <Plans onPlanClick={scrollToForm} />
     </div>
   );
 };
