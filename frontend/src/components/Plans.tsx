@@ -73,7 +73,7 @@ interface PlansProps {
 
 const Plans = ({ onPlanClick }: PlansProps) => {
   return (
-    <div className="py-14 lg:py-20 px-6 sm:px-8 lg:px-16 bg-[#121212] ">
+    <div className="py-14 lg:py-20 px-4 md:px-12 lg:px-16 bg-[#121212] ">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-3">
@@ -85,18 +85,18 @@ const Plans = ({ onPlanClick }: PlansProps) => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {plans.map((plan) => (
             <div
               key={plan.id}
               className={`relative rounded-2xl border p-6 lg:p-8 flex flex-col ${
                 plan.popular
-                  ? "border-blue-500/50 bg-gradient-to-b from-blue-500/5 to-transparent shadow-xl shadow-blue-500/5"
-                  : "border-white/10 bg-white/[0.02]"
+                  ? "border-blue-500/50 bg-linear-to-b from-blue-500/5 to-transparent shadow-xl shadow-blue-500/5"
+                  : "border-white/10 bg-white/2"
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-400 text-xs font-semibold text-white px-4 py-1 rounded-full whitespace-nowrap">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-linear-to-r from-blue-500 to-cyan-400 text-xs font-semibold text-white px-4 py-1 rounded-full whitespace-nowrap">
                   MOST POPULAR
                 </div>
               )}
@@ -134,7 +134,7 @@ const Plans = ({ onPlanClick }: PlansProps) => {
                 onClick={onPlanClick}
                 className={`w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
                   plan.popular
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:from-blue-600 hover:to-cyan-500 shadow-lg shadow-blue-500/25"
+                    ? "bg-linear-to-r from-blue-500 to-cyan-400 text-white hover:from-blue-600 hover:to-cyan-500 shadow-lg shadow-blue-500/25"
                     : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
                 }`}
               >

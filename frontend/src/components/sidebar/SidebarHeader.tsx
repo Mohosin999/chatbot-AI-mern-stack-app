@@ -9,12 +9,16 @@ interface SidebarHeaderProps {
   onCreateChat: () => void;
 }
 
-const SidebarHeader = ({ searchTerm, setSearchTerm, onCreateChat }: SidebarHeaderProps) => {
+const SidebarHeader = ({
+  searchTerm,
+  setSearchTerm,
+  onCreateChat,
+}: SidebarHeaderProps) => {
   return (
     <div>
       <div className="flex items-center justify-center my-6">
-        <img src="./vite.png" alt="App Logo" className="w-8 h-8" />
-        <h2 className="text-2xl font-semibold ml-2">Chatbot</h2>
+        <img src="./vite.png" alt="App Logo" className="w-14 h-14" />
+        <h2 className="text-2xl font-semibold">ORTEX</h2>
       </div>
 
       <Button
