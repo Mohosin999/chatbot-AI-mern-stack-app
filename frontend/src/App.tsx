@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Loading from "./pages/Loading";
+import Upgrade from "./pages/Upgrade";
 import "./assets/prism.css";
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/loading" element={<Loading />} />
+        <Route path="/upgrade" element={<Upgrade />} />
         <Route path="*" element={<Loading />} />
       </Routes>
     </div>

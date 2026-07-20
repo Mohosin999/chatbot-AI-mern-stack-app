@@ -21,7 +21,8 @@ router
 router
   .route("/api/v1/chats")
   .get(authenticate, chatController.findAllItems)
-  .post(authenticate, chatController.create);
+  .post(authenticate, chatController.create)
+  .delete(authenticate, chatController.removeAllItems);
 
 router
   .route("/api/v1/chats/:id")
@@ -43,6 +44,8 @@ router.post(
 
 router
   .get("/api/v1/user", authenticate, userController.getUser)
-  .patch("/api/v1/user", authenticate, userController.updateMe);
+  .patch("/api/v1/user", authenticate, userController.updateMe)
+  .patch("/api/v1/user/name", authenticate, userController.updateName)
+  .delete("/api/v1/user", authenticate, userController.deleteAccount);
 
 export default router;

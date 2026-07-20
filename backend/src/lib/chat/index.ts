@@ -70,6 +70,11 @@ const removeChat = async (id: string) => {
   return Chat.findByIdAndDelete(id);
 };
 
+const removeAllChats = async (userId: string): Promise<{ deletedCount?: number }> => {
+  if (!userId) throw new Error("User id is required");
+  return Chat.deleteMany({ userId });
+};
+
 const updateChat = async (id: string, data: Record<string, unknown>) => {
   const chat = await Chat.findById(id);
   if (!chat) {
@@ -84,4 +89,4 @@ const updateChat = async (id: string, data: Record<string, unknown>) => {
   return updatedChat;
 };
 
-export { createChat, findAll, findChatById, removeChat, updateChat, updateMessageInChat };
+export { createChat, findAll, findChatById, removeChat, removeAllChats, updateChat, updateMessageInChat };

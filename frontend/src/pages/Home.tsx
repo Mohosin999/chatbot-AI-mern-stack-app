@@ -39,7 +39,7 @@ const Home = () => {
       </header>
 
       <div className="flex flex-1">
-        <aside className="hidden lg:block w-1/4 bg-[#181818] h-screen">
+        <aside className="hidden lg:block w-1/5 bg-[#181818] h-screen">
           <Sidebar />
         </aside>
 
@@ -67,7 +67,7 @@ const Home = () => {
           </div>
         </div>
 
-        <main className="flex-1 lg:w-3/4">
+        <main className="flex-1 lg:w-4/5">
           <ContentArea />
         </main>
       </div>

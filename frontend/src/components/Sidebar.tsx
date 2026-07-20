@@ -15,7 +15,6 @@ import { useAppSelector } from "@/hooks/useAppStore";
 import ChatList from "./sidebar/ChatList";
 import SidebarFooter from "./sidebar/SidebarFooter";
 import SidebarHeader from "./sidebar/SidebarHeader";
-import ContextSettings from "./memory/ContextSettings";
 import toast from "react-hot-toast";
 import type { ChatData } from "@/types";
 
@@ -32,8 +31,6 @@ const Sidebar = ({ handleSidebarClose }: SidebarProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [chatToDelete, setChatToDelete] = useState<ChatData | null>(null);
   const [alertOpen, setAlertOpen] = useState(false);
-  const [showContext, setShowContext] = useState(false);
-
   useEffect(() => {
     if (!token) return;
 
@@ -124,10 +121,6 @@ const Sidebar = ({ handleSidebarClose }: SidebarProps) => {
     chat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (showContext) {
-    return <ContextSettings onClose={() => setShowContext(false)} />;
-  }
-
   return (
     <div className="flex flex-col h-screen px-3 xl:px-4 bg-[#181818] text-white">
       <SidebarHeader
@@ -151,7 +144,6 @@ const Sidebar = ({ handleSidebarClose }: SidebarProps) => {
         token={token}
         onLogout={handleLogout}
         onLogin={() => navigate("/login")}
-        onOpenContext={() => setShowContext(true)}
       />
     </div>
   );

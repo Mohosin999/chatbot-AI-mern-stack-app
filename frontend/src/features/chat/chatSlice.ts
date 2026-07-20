@@ -110,6 +110,27 @@ export const getChatById = createAsyncThunk(
   },
 );
 
+export const deleteAllChats = createAsyncThunk(
+  "chat/deleteAllChats",
+  async (_, { rejectWithValue }) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken)
+        return rejectWithValue("No authentication accessToken found");
+
+      await api.delete(`${import.meta.env.VITE_BASE_URL}/chats`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      return true;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Delete all chats failed",
+      );
+    }
+  },
+);
+
 export const deleteChatById = createAsyncThunk(
   "chat/deleteChatById",
   async (chatId: string, { rejectWithValue }) => {
@@ -543,6 +564,25 @@ const chatSlice = createSlice({
       })
       .addCase(getChatById.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // ---------- DELETE ALL CHATS LIFECYCLE ----------
+      .addCase(deleteAllChats.pending, (state) => {
+        state.isDeleting = true;
+        state.error = null;
+      })
+      .addCase(deleteAllChats.fulfilled, (state) => {
+        state.isDeleting = false;
+        state.currentChat = null;
+        state.chat = null;
+        if (state.allChats?.data) {
+          state.allChats.data = [];
+        }
+        state.error = null;
+      })
+      .addCase(deleteAllChats.rejected, (state, action) => {
+        state.isDeleting = false;
         state.error = action.payload as string;
       })
 

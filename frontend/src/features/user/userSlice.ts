@@ -53,6 +53,53 @@ export const updateCustomInstructions = createAsyncThunk(
   }
 );
 
+export const updateName = createAsyncThunk(
+  "user/updateName",
+  async (name: string, { rejectWithValue }) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken)
+        return rejectWithValue("No authentication accessToken found");
+
+      const res = await api.patch(
+        `${import.meta.env.VITE_BASE_URL}/user/name`,
+        { name },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+
+      return res.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update name"
+      );
+    }
+  }
+);
+
+export const deleteAccount = createAsyncThunk(
+  "user/deleteAccount",
+  async (_, { rejectWithValue }) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken)
+        return rejectWithValue("No authentication accessToken found");
+
+      await api.delete(
+        `${import.meta.env.VITE_BASE_URL}/user`,
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      return null;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to delete account"
+      );
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -91,6 +138,29 @@ const userSlice = createSlice({
       })
       .addCase(updateCustomInstructions.rejected, (state, action) => {
         state.updating = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updateName.pending, (state) => {
+        state.updating = true;
+        state.error = null;
+      })
+      .addCase(updateName.fulfilled, (state, action) => {
+        state.updating = false;
+        if (state.profile) {
+          state.profile.name = action.payload.name;
+        }
+        state.error = null;
+      })
+      .addCase(updateName.rejected, (state, action) => {
+        state.updating = false;
+        state.error = action.payload as string;
+      })
+      .addCase(deleteAccount.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteAccount.fulfilled, () => initialState)
+      .addCase(deleteAccount.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload as string;
       })
       .addMatcher(
