@@ -5,6 +5,10 @@ const Loading = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.title = "ChatBOT - Loading";
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       navigate("/");
     }, 1000);

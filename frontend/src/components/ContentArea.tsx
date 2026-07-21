@@ -11,6 +11,7 @@ import {
   addChatToAllChats,
   addTempMessage,
   updateMessageContent,
+  updateChatName,
   removeMessagesAfter,
   abortStream,
 } from "@/features/chat/chatSlice";
@@ -89,10 +90,10 @@ const ContentArea = () => {
 
   useEffect(() => {
     if (!accessToken) return;
-    if (currentChat?.data?.messages.length === 0) {
+    if (!currentChat || currentChat?.data?.messages.length === 0) {
       chatInputRef.current?.focus();
     }
-  }, [accessToken, currentChat?.data?.messages, isGenerating]);
+  }, [accessToken, currentChat, currentChat?.data?.messages, isGenerating]);
 
   const handleSend = async (text: string, files?: { name: string; mimeType: string; data: string }[]) => {
     if (!accessToken) return;
@@ -110,6 +111,10 @@ const ContentArea = () => {
       dispatch(addChatToAllChats(res.payload.data));
 
       await dispatch(getChatById(currentChatId) as any);
+
+      if (text.trim()) {
+        dispatch(updateChatName({ chatId: currentChatId, chatName: text.trim() }));
+      }
     }
 
     const userMsg: Record<string, unknown> = {

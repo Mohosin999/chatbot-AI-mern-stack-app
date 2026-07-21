@@ -230,7 +230,7 @@ export class GeminiProvider implements AIProvider {
   }
 
   async generateContentText(prompt: string): Promise<string> {
-    const model = this.getModel();
+    const model = this.getModel({ temperature: 0 });
     const result = await model.generateContent(prompt);
     return result.response.text().trim();
   }

@@ -436,6 +436,12 @@ const chatSlice = createSlice({
       }
     },
 
+    clearCurrentChat: (state) => {
+      state.currentChat = null;
+      state.chat = null;
+      state.error = null;
+    },
+
     addChatToAllChats: (state, action) => {
       state.allChats = state.allChats
         ? { ...state.allChats, data: [action.payload, ...state.allChats.data] }
@@ -569,6 +575,10 @@ const chatSlice = createSlice({
         state.isLoading = false;
         state.allChats = action.payload;
         state.error = null;
+        if (!action.payload?.data?.length) {
+          state.currentChat = null;
+          state.chat = null;
+        }
       })
       .addCase(getAllChats.rejected, (state, action) => {
         state.isLoading = false;
@@ -730,6 +740,7 @@ const chatSlice = createSlice({
 // Export all synchronous actions for use in components
 export const {
   updateChatName,
+  clearCurrentChat,
   addChatToAllChats,
   addTempMessage,
   updateMessageContent,

@@ -175,7 +175,7 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(({ onSend, isStrea
             placeholder="Ask anything"
             rows={1}
             disabled={!token}
-            className={`flex-1 resize-none overflow-hidden rounded-xl bg-transparent px-2 py-4 pr-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-0 transition-all duration-150 max-h-60 ${
+            className={`flex-1 resize-none overflow-hidden rounded-xl bg-transparent px-2 py-4 pr-2 text-gray-800 dark:text-gray-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-0 transition-all duration-150 max-h-60 ${
               !token ? "cursor-not-allowed opacity-50 select-none" : ""
             }`}
           />

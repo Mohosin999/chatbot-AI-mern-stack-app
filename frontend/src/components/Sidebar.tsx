@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logoutUser } from "@/features/auth/authSlice";
 import {
-  createChat,
+  clearCurrentChat,
   deleteChatById,
   getAllChats,
   getChatById,
@@ -84,17 +84,10 @@ const Sidebar = ({ handleSidebarClose, collapsed = false, onToggleCollapse, onCl
     syncChatTitles();
   }, [dispatch, token]);
 
-  const handleCreateChat = async () => {
+  const handleCreateChat = () => {
     if (!token) return navigate("/login");
     if (handleSidebarClose) handleSidebarClose();
-
-    const res = await dispatch(createChat({}) as any);
-
-    if (res.meta.requestStatus === "fulfilled") {
-      const chatData = res.payload.data;
-      await dispatch(getChatById(chatData.id) as any);
-      dispatch(addChatToAllChats(chatData));
-    }
+    dispatch(clearCurrentChat());
   };
 
   const handleGetChatById = (chatId: string) => {

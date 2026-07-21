@@ -6,6 +6,7 @@ const Register = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.title = "ChatBOT - Register";
     navigate("/login?mode=register", { replace: true });
   }, [navigate]);
 

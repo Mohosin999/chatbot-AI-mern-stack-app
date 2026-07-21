@@ -50,6 +50,10 @@ const Login = () => {
     (searchParams.get("mode") as AuthMode) || "login",
   );
 
+  useEffect(() => {
+    document.title = "ChatBOT - Login";
+  }, []);
+
   const modeRef = { current: mode };
 
   const resolver = (data: MergedFormData) => {
@@ -121,12 +125,12 @@ const Login = () => {
         </div>
 
         {/* --------------- Right Form Section ---------------- */}
-        <div className="lg:w-1/2 flex items-center justify-center p-4 lg:p-16 xl:p-24 w-full h-full overflow-y-auto">
+        <div className="lg:w-1/2 flex items-start lg:items-center justify-center p-4 lg:p-16 xl:p-24 w-full h-full overflow-y-auto">
           <div className="w-full max-w-md mx-auto lg:mx-0 mt-4 lg:mt-0 lg:my-auto">
             <div className="p-2">
               {/* Logo and Title */}
               <div className="mb-8">
-                <div className="flex items-center justify-center mb-6">
+                <div className="flex items-center justify-center mb-16 lg:mb-6">
                   <img src="/vite.png" alt="Logo" className="w-12 h-12 mr-2" />
                   <span className="text-xl font-bold text-gray-100">
                     ChatBOT
@@ -137,8 +141,9 @@ const Login = () => {
                   <h2 className="text-5xl lg:text-6xl font-thin! text-gray-300 mb-5">
                     Question what's next
                   </h2>
-                  <p className="text-gray-300 text-sm sm:text-base">
-                    Your thinking partner for big ambitions
+                  <p className="text-gray-300 text-base">
+                    A thinking partner that remembers your conversations, understands
+                    context, and helps you think deeper
                   </p>
                 </div>
               </div>
@@ -265,7 +270,7 @@ const Login = () => {
                 </form>
               </Form>
 
-              <p className="text-center text-sm text-gray-500 mt-6">
+              <p className="text-center text-sm text-gray-400 mt-6">
                 {mode === "login" ? (
                   <>
                     Don't have an account?{" "}

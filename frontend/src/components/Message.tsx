@@ -255,9 +255,9 @@ const Message = ({ msg, onEdit }: MessageProps) => {
       >
         {msg.isStreaming && !msg.content ? (
           <span className="flex space-x-1 px-1">
-            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
-            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
+            <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" />
+            <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
+            <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
           </span>
         ) : isEditing ? (
           <div className="flex flex-col rounded-xl bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-blue-500/50 transition-shadow">

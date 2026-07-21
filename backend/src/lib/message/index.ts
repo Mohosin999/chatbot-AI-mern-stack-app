@@ -15,7 +15,7 @@ const generateChatTitle = async (
   userPrompt: string,
 ): Promise<string | null> => {
   try {
-    const titlePrompt = `Create a short, natural-sounding chat title (3-4 words) that captures the main topic. Use title case, plain text only, no quotes, no punctuation, no emojis. Return only the title.\n\n${userPrompt}`;
+    const titlePrompt = `You are a strict title generator. Your only job: generate EXACTLY 3-4 words as a chat title. No extra text, no explanations, no punctuation, no quotes, no emojis. Title case. Return ONLY the title.\n\nUser message: ${userPrompt}`;
     return await provider.generateContentText(titlePrompt);
   } catch (err) {
     console.error("Failed to generate chat title:", (err as Error).message);

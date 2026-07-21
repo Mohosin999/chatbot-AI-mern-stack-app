@@ -19,6 +19,11 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    const chatName = currentChat?.data?.name;
+    document.title = chatName ? `ChatBOT - ${chatName}` : "ChatBOT";
+  }, [currentChat]);
+
+  useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       navigate("/login");
