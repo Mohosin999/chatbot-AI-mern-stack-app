@@ -1,6 +1,8 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import Markdown from "react-markdown";
-import Prism from "prismjs";
+import remarkGfm from "remark-gfm";
+import hljs from "highlight.js";
+import "highlight.js/styles/atom-one-dark.css";
 import { FiCopy, FiCheck } from "react-icons/fi";
 import { LuPencilLine } from "react-icons/lu";
 
@@ -12,15 +14,56 @@ interface MessageProps {
   onEdit?: (messageId: string | number, newContent: string) => void;
 }
 
+const LANG_MAP: Record<string, string> = {
+  js: "javascript", jsx: "javascript", mjs: "javascript", cjs: "javascript",
+  ts: "typescript", tsx: "typescript", mts: "typescript", cts: "typescript",
+  py: "python", rb: "ruby", rs: "rust", go: "go",
+  sh: "bash", bash: "bash", zsh: "bash", shell: "bash",
+  yml: "yaml", yaml: "yaml", md: "markdown",
+  css: "css", scss: "scss", less: "less",
+  json: "json", xml: "xml", sql: "sql",
+  graphql: "graphql", gql: "graphql", php: "php",
+  swift: "swift", kt: "kotlin", kotlin: "kotlin",
+  c: "c", cpp: "cpp", h: "c", hpp: "cpp",
+  java: "java", scala: "scala",
+  pl: "perl", pas: "pascal", lua: "lua", r: "r",
+  docker: "dockerfile", dockerfile: "dockerfile",
+  http: "http", https: "http",
+};
+
+const CodeBlock = ({ code, lang }: { code: string; lang: string }) => {
+  const resolvedLang = LANG_MAP[lang] || lang;
+  let html: string;
+
+  try {
+    if (hljs.getLanguage(resolvedLang)) {
+      html = hljs.highlight(code, { language: resolvedLang }).value;
+    } else {
+      html = hljs.highlightAuto(code).value;
+    }
+  } catch {
+    html = code;
+  }
+
+  return (
+    <code className="hljs" dangerouslySetInnerHTML={{ __html: html }} />
+  );
+};
+
 const Message = ({ msg, onEdit }: MessageProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(msg.content);
   const [copied, setCopied] = useState(false);
+  const [codeCopiedId, setCodeCopiedId] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    Prism.highlightAll();
-  }, [msg.content]);
+  const handleCodeCopy = useCallback(async (code: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCodeCopiedId(id);
+      setTimeout(() => setCodeCopiedId(prev => prev === id ? null : prev), 2000);
+    } catch { /* fallback */ }
+  }, []);
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -81,6 +124,108 @@ const Message = ({ msg, onEdit }: MessageProps) => {
     }
   };
 
+  const markdownComponents = useMemo(() => ({
+    code({ className, children, ...props }: any) {
+      const match = /language-(\w+)/.exec(className || '');
+      const code = String(children).replace(/\n$/, '');
+
+      if (!match) {
+        return (
+          <code className="bg-gray-200 dark:bg-[#3a3a3a] text-[#e8794e] dark:text-[#f59e6e] px-1.5 py-0.5 rounded-md text-sm font-mono before:content-none after:content-none" {...props}>
+            {code}
+          </code>
+        );
+      }
+
+      const lang = match[1];
+      const id = `${lang}-${code.slice(0, 20)}`;
+
+      return (
+        <div className="my-3 rounded-xl overflow-hidden border border-[#44475a]">
+          <div className="flex items-center justify-between px-4 py-2 bg-[#21222c] border-b border-[#44475a]">
+            <span className="text-xs text-gray-400 font-mono uppercase tracking-wide">{lang}</span>
+            <button
+              onClick={() => handleCodeCopy(code, id)}
+              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors cursor-pointer"
+            >
+              {codeCopiedId === id ? <FiCheck size={13} /> : <FiCopy size={13} />}
+              {codeCopiedId === id ? "Copied" : "Copy"}
+            </button>
+          </div>
+          <pre className="!m-0 !rounded-none !border-0 bg-[#292C34] p-4 overflow-x-auto">
+            <CodeBlock code={code} lang={lang} />
+          </pre>
+        </div>
+      );
+    },
+    pre({ children }: any) {
+      return <>{children}</>;
+    },
+    p({ children }: any) {
+      return <p className="my-2 leading-7 text-gray-900 dark:text-gray-200">{children}</p>;
+    },
+    h1({ children }: any) {
+      return <h1 className="text-2xl font-bold mt-6 mb-3 pb-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">{children}</h1>;
+    },
+    h2({ children }: any) {
+      return <h2 className="text-xl font-semibold mt-5 mb-2 pb-1 border-b border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white">{children}</h2>;
+    },
+    h3({ children }: any) {
+      return <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-900 dark:text-white">{children}</h3>;
+    },
+    h4({ children }: any) {
+      return <h4 className="text-base font-semibold mt-3 mb-1 text-gray-900 dark:text-white">{children}</h4>;
+    },
+    ul({ children }: any) {
+      return <ul className="list-disc pl-6 my-2 space-y-1.5 text-gray-900 dark:text-gray-200 [&_ul]:list-circle [&_ul_ul]:list-square">{children}</ul>;
+    },
+    ol({ children }: any) {
+      return <ol className="list-decimal pl-6 my-2 space-y-1.5 text-gray-900 dark:text-gray-200">{children}</ol>;
+    },
+    li({ children }: any) {
+      return <li className="leading-7 [&>ul]:mt-1 [&>ol]:mt-1">{children}</li>;
+    },
+    blockquote({ children }: any) {
+      return (
+        <blockquote className="border-l-4 border-[#48A4FF] pl-4 my-3 py-1 bg-[#48A4FF]/5 dark:bg-[#48A4FF]/10 rounded-r-lg text-gray-700 dark:text-gray-300 italic">
+          {children}
+        </blockquote>
+      );
+    },
+    table({ children }: any) {
+      return (
+        <div className="my-3 overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+          <table className="w-full text-sm divide-y divide-gray-200 dark:divide-gray-700">{children}</table>
+        </div>
+      );
+    },
+    thead({ children }: any) {
+      return <thead className="bg-gray-100 dark:bg-[#2a2a2a]">{children}</thead>;
+    },
+    tbody({ children }: any) {
+      return <tbody className="divide-y divide-gray-200 dark:divide-gray-700">{children}</tbody>;
+    },
+    tr({ children }: any) {
+      return <tr className="hover:bg-gray-50 dark:hover:bg-[#2a2a2a]/50">{children}</tr>;
+    },
+    th({ children }: any) {
+      return <th className="px-4 py-2.5 text-left font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">{children}</th>;
+    },
+    td({ children }: any) {
+      return <td className="px-4 py-2.5 text-gray-900 dark:text-gray-200">{children}</td>;
+    },
+    a({ href, children }: any) {
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer" className="text-[#48A4FF] hover:underline underline-offset-2">
+          {children}
+        </a>
+      );
+    },
+    hr() {
+      return <hr className="my-4 border-gray-300 dark:border-gray-600" />;
+    },
+  }), [codeCopiedId, handleCodeCopy]);
+
   if (msg.isTyping) {
     return (
       <div className="flex justify-start">
@@ -100,13 +245,13 @@ const Message = ({ msg, onEdit }: MessageProps) => {
       }`}
     >
       <div
-        className={`max-w-[85%] md:max-w-[75%] ${
+        className={
           msg.role === "user"
             ? isEditing
               ? "bg-gray-200 dark:bg-[#3a3a3a] rounded-2xl w-full md:max-w-2xl"
-              : "bg-gray-100 dark:bg-[#303030] rounded-2xl rounded-br-sm px-3"
+              : "bg-gray-100 dark:bg-[#303030] rounded-2xl rounded-br-sm px-3 max-w-[85%]"
             : "w-full"
-        }`}
+        }
       >
         {msg.isStreaming && !msg.content ? (
           <span className="flex space-x-1 px-1">
@@ -183,8 +328,10 @@ const Message = ({ msg, onEdit }: MessageProps) => {
                 )}
               </div>
             )}
-            <div className="text-base reset-tw text-gray-900 dark:text-gray-200 leading-relaxed">
-              <Markdown>{msg.content}</Markdown>
+            <div className="text-base text-gray-900 dark:text-gray-200 leading-relaxed">
+              <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                {msg.content}
+              </Markdown>
             </div>
           </div>
         )}

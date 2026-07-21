@@ -136,13 +136,6 @@
 }
 
 /* =================================================
-           Style for showing code block
-================================================== */
-.reset-tw :not(pre):not(code) {
-  all: revert;
-}
-
-/* =================================================
            Scrollbar style
 ================================================== */
 /* Dark scrollbar */
@@ -172,19 +165,10 @@
   scrollbar-color: #333 transparent;
 }
 
-/* Markdown headings - less bold */
-.reset-tw h1,
-.reset-tw h2,
-.reset-tw h3,
-.reset-tw h4,
-.reset-tw h5,
-.reset-tw h6 {
-  font-weight: 400 !important;
+/* Markdown content - list nested circle/square */
+.list-circle {
+  list-style-type: circle;
 }
-
-.reset-tw p,
-.reset-tw li,
-.reset-tw blockquote {
-  line-height: 1.8 !important;
-  margin: 6px !important;
+.list-square {
+  list-style-type: square;
 }

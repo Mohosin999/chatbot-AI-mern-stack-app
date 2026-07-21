@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -22,7 +22,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 
@@ -51,13 +50,9 @@ const Login = () => {
     (searchParams.get("mode") as AuthMode) || "login",
   );
 
-  const formRef = useRef<HTMLDivElement>(null);
-  const emailInputRef = useRef<HTMLInputElement>(null);
-  const nameInputRef = useRef<HTMLInputElement>(null);
-  const modeRef = useRef(mode);
-  modeRef.current = mode;
+  const modeRef = { current: mode };
 
-  const resolver = useCallback((data: MergedFormData) => {
+  const resolver = (data: MergedFormData) => {
     const schema = modeRef.current === "login" ? loginSchema : registerSchema;
     const result = schema.safeParse(data);
     if (result.success) {
@@ -73,19 +68,12 @@ const Login = () => {
       }
     }
     return { values: {}, errors };
-  }, []);
+  };
 
   const form = useForm<MergedFormData>({
     resolver,
     defaultValues: { name: "", email: "", password: "" },
   });
-
-  useEffect(() => {
-    form.clearErrors();
-    const input =
-      mode === "login" ? emailInputRef.current : nameInputRef.current;
-    input?.focus();
-  }, [mode, form]);
 
   useEffect(() => {
     if (user) {
@@ -106,26 +94,13 @@ const Login = () => {
     }
   };
 
-  const handleSubmit = useCallback(
-    (values: MergedFormData) => {
-      if (mode === "login") {
-        dispatch(loginUser(values as LoginFormData) as any);
-      } else {
-        dispatch(registerUser(values as RegisterFormData) as any);
-      }
-    },
-    [dispatch, mode],
-  );
-
-  // const scrollToForm = () => {
-  //   formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-  //   setTimeout(() => {
-  //     (mode === "login"
-  //       ? emailInputRef.current
-  //       : nameInputRef.current
-  //     )?.focus();
-  //   }, 500);
-  // };
+  const handleSubmit = (values: MergedFormData) => {
+    if (mode === "login") {
+      dispatch(loginUser(values as LoginFormData) as any);
+    } else {
+      dispatch(registerUser(values as RegisterFormData) as any);
+    }
+  };
 
   const switchMode = (newMode: AuthMode) => {
     setMode(newMode);
@@ -135,38 +110,40 @@ const Login = () => {
 
   return (
     <div className="bg-[#121212] h-screen overflow-hidden">
-      {/* Hero Section */}
       <div className="w-full h-full flex flex-col lg:flex-row">
-        {/* ===================================================================
-                                 Left - Image Section
-          ===================================================================*/}
+        {/* --------------- Left Image Section ---------------- */}
         <div className="lg:w-1/2 hidden lg:block">
           <img
-            src="/img/home.png"
-            alt=""
+            src="/img/banner.png"
+            alt="Banner Image"
             className="w-full h-full object-cover"
           />
         </div>
 
-        {/* ===================================================================
-                                 Right - Form Section
-          ===================================================================*/}
-        <div className="lg:w-1/2 flex items-center justify-center p-4 lg:p-10 xl:p-24 w-full h-full overflow-y-auto">
-          <div ref={formRef} className="w-full max-w-md mx-auto lg:mx-0">
-            {/* Card Container - Only for small screens */}
+        {/* --------------- Right Form Section ---------------- */}
+        <div className="lg:w-1/2 flex items-center justify-center p-4 lg:p-16 xl:p-24 w-full h-full overflow-y-auto">
+          <div className="w-full max-w-md mx-auto lg:mx-0 mt-4 lg:mt-0 lg:my-auto">
             <div className="p-2">
-              <div className="mb-8 text-center">
-                <h2 className="text-2xl font-semibold text-gray-200 mb-1">
-                  {mode === "login" ? "Welcome back" : "Create account"}
-                </h2>
-                <p className="text-gray-400 text-sm">
-                  {mode === "login"
-                    ? "Let's sign in to explore the chatbot."
-                    : "Sign up to get started with Chatbot"}
-                </p>
+              {/* Logo and Title */}
+              <div className="mb-8">
+                <div className="flex items-center justify-center mb-6">
+                  <img src="/vite.png" alt="Logo" className="w-12 h-12 mr-2" />
+                  <span className="text-xl font-bold text-gray-100">
+                    ChatBOT
+                  </span>
+                </div>
+
+                <div className="text-center">
+                  <h2 className="text-5xl lg:text-6xl font-thin! text-gray-300 mb-5">
+                    Question what's next
+                  </h2>
+                  <p className="text-gray-300 text-sm sm:text-base">
+                    Your thinking partner for big ambitions
+                  </p>
+                </div>
               </div>
 
-              {/* Google Login Button - Moved to Top */}
+              {/* Google Login Button - start */}
               <div className="mb-6">
                 <div className="relative">
                   <div className="absolute inset-0 opacity-0 z-10">
@@ -187,8 +164,8 @@ const Login = () => {
                   </button>
                 </div>
               </div>
+              {/* Google Login Button - end */}
 
-              {/* Divider */}
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t border-white/10" />
@@ -200,13 +177,10 @@ const Login = () => {
                 </div>
               </div>
 
-              {/* ==================================================
-                                 Form
-               ===================================================*/}
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(handleSubmit)}
-                  className="flex flex-col gap-5"
+                  className="flex flex-col gap-4 sm:gap-5"
                   noValidate
                 >
                   {mode === "register" && (
@@ -218,7 +192,6 @@ const Login = () => {
                           <FormControl>
                             <Input
                               {...field}
-                              ref={nameInputRef}
                               value={field.value ?? ""}
                               type="text"
                               autoComplete="name"
@@ -240,7 +213,6 @@ const Login = () => {
                         <FormControl>
                           <Input
                             {...field}
-                            ref={mode === "login" ? emailInputRef : undefined}
                             value={field.value ?? ""}
                             type="email"
                             autoComplete="email"
@@ -285,9 +257,9 @@ const Login = () => {
                     {loading ? (
                       <LoaderCircle className="w-5 h-5 animate-spin" />
                     ) : mode === "login" ? (
-                      "Sign In"
+                      "Login"
                     ) : (
-                      "Create Account"
+                      "Register"
                     )}
                   </Button>
                 </form>
@@ -302,7 +274,7 @@ const Login = () => {
                       onClick={() => switchMode("register")}
                       className="text-blue-400 hover:text-blue-300 hover:underline transition cursor-pointer"
                     >
-                      Sign up
+                      Register
                     </button>
                   </>
                 ) : (
@@ -313,7 +285,7 @@ const Login = () => {
                       onClick={() => switchMode("login")}
                       className="text-blue-400 hover:text-blue-300 hover:underline transition cursor-pointer"
                     >
-                      Sign in
+                      Login
                     </button>
                   </>
                 )}
@@ -322,10 +294,6 @@ const Login = () => {
           </div>
         </div>
       </div>
-
-      {/* ===================================================================
-                                  Pricing Section
-        ===================================================================*/}
     </div>
   );
 };
