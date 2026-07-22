@@ -65,14 +65,15 @@ const ChatItem = ({
   const openMenu = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    setMenuPos({ top: rect.top, left: rect.left - 20 });
+    setMenuPos({ top: rect.top, left: rect.left - 40 });
     setMenuOpen((prev) => !prev);
   }, []);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setMenuPos({ top: e.clientY, left: e.clientX - 80 });
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setMenuPos({ top: rect.top, left: rect.right - 160 });
     setMenuOpen(true);
   }, []);
 
@@ -130,7 +131,7 @@ const ChatItem = ({
           ref={btnRef}
           onClick={openMenu}
           className={`p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-105 transition cursor-pointer inline-flex ${
-            isSelected ? "visible" : "lg:invisible lg:group-hover:visible"
+            isSelected ? "visible" : "invisible group-hover:visible"
           }`}
         >
           <BsThreeDots className="text-gray-500 dark:text-gray-400" />

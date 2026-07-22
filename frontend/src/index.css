@@ -127,7 +127,7 @@
 }
 
 .custom-padding {
-  @apply px-4 md:px-14 lg:px-20 xl:px-48;
+  @apply px-4 md:px-14 lg:px-20 xl:px-52;
 }
 
 /* Hide scrollbar but keep scrolling */

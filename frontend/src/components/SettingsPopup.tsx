@@ -174,7 +174,7 @@ const SettingsPopup = ({
     <>
       {/* ── Mobile: solid full-screen; Desktop: dimmed centered overlay ── */}
       <div
-        className="fixed inset-0 z-[100] bg-white dark:bg-[#1e1e1e] lg:bg-black/30 dark:lg:bg-white/10 lg:flex lg:items-center lg:justify-center"
+        className="fixed inset-0 z-100 bg-white dark:bg-[#1e1e1e] lg:bg-black/30 dark:lg:bg-[#1e1e1e]/30 lg:flex lg:items-center lg:justify-center"
         onClick={() => onOpenChange(false)}
       >
         {/* ── Mobile: fills viewport; Desktop: centered modal ── */}

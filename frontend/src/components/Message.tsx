@@ -82,7 +82,7 @@ const CodeBlock = ({ code, lang }: { code: string; lang: string }) => {
     html = code;
   }
 
-  return <code className="hljs" dangerouslySetInnerHTML={{ __html: html }} />;
+  return <code className="hljs bg-[#1B1B1C]! text-sm font-mono!" dangerouslySetInnerHTML={{ __html: html }} />;
 };
 
 const Message = ({ msg, onEdit }: MessageProps) => {
@@ -185,8 +185,8 @@ const Message = ({ msg, onEdit }: MessageProps) => {
         const id = `${lang}-${code.slice(0, 20)}`;
 
         return (
-          <div className="my-3 rounded-xl overflow-hidden border border-[#44475a]">
-            <div className="flex items-center justify-between px-4 py-2 bg-[#21222c] border-b border-[#44475a]">
+          <div className="my-3 rounded-xl overflow-hidden border border-[#1B1B1C]">
+            <div className="flex items-center justify-between px-4 py-2 bg-[#2C2C2E] border-b border-[#1B1B1C]">
               <span className="text-xs text-gray-400 font-mono uppercase tracking-wide">
                 {lang}
               </span>
@@ -202,7 +202,7 @@ const Message = ({ msg, onEdit }: MessageProps) => {
                 {codeCopiedId === id ? "Copied" : "Copy"}
               </button>
             </div>
-            <pre className="!m-0 !rounded-none !border-0 bg-[#292C34] p-4 overflow-x-auto">
+            <pre className="m-0! rounded-none! border-0! bg-[#1B1B1C] p-4 overflow-x-auto">
               <CodeBlock code={code} lang={lang} />
             </pre>
           </div>

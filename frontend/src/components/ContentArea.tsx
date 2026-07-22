@@ -35,6 +35,7 @@ const ContentArea = () => {
   const chatInputRef = useRef<ChatInputHandle>(null);
   const dispatch = useDispatch();
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const prevChatIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const container = chatContainerRef.current;
@@ -53,21 +54,45 @@ const ContentArea = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const scrollMessagesToBottom = (instant?: boolean) => {
+    const container = chatContainerRef.current;
+    if (!container) return;
+    if (instant) {
+      container.scrollTop = container.scrollHeight;
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const hasStreamingMessage = currentChat?.data?.messages?.some(
     (msg: MessageType) => msg.isStreaming,
   );
   const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
-    if (!chatContainerRef.current) return;
+    const container = chatContainerRef.current;
+    if (!container) return;
 
-    const scrollToBottom = () => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+    const chatId = currentChat?.data?.id ?? null;
+    const isNewChat = chatId !== prevChatIdRef.current;
+    prevChatIdRef.current = chatId;
 
-    const images = chatContainerRef.current.querySelectorAll("img");
+    if (isNewChat) {
+      scrollMessagesToBottom(true);
+      return;
+    }
+
+    if (hasStreamingMessage) {
+      container.scrollTop = container.scrollHeight;
+      return;
+    }
+
+    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
+    if (!isNearBottom) return;
+
+    const images = container.querySelectorAll("img");
     if (images.length === 0) {
-      scrollToBottom();
+      scrollMessagesToBottom(false);
       return;
     }
 
@@ -78,22 +103,22 @@ const ContentArea = () => {
       } else {
         img.addEventListener("load", () => {
           loadedCount++;
-          if (loadedCount === images.length) scrollToBottom();
+          if (loadedCount === images.length) scrollMessagesToBottom(false);
         });
         img.addEventListener("error", () => {
           loadedCount++;
-          if (loadedCount === images.length) scrollToBottom();
+          if (loadedCount === images.length) scrollMessagesToBottom(false);
         });
       }
     });
 
-    if (loadedCount === images.length) scrollToBottom();
-  }, [currentChat?.data?.messages]);
+    if (loadedCount === images.length) scrollMessagesToBottom(false);
+  }, [currentChat?.data?.messages, hasStreamingMessage]);
 
   useEffect(() => {
     if (!accessToken) return;
     if (!currentChat || currentChat?.data?.messages.length === 0) {
-      chatInputRef.current?.focus();
+      chatInputRef.current?.focus({ preventScroll: true });
     }
   }, [accessToken, currentChat, currentChat?.data?.messages, isGenerating]);
 
@@ -158,7 +183,7 @@ const ContentArea = () => {
       }) as any,
     );
 
-    chatInputRef.current?.focus();
+    chatInputRef.current?.focus({ preventScroll: true });
   };
 
   const handleEdit = async (messageId: string | number, newContent: string) => {
@@ -184,7 +209,7 @@ const ContentArea = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white dark:bg-[#212121] pb-6 pt-16 lg:pt-6 relative">
+    <div className="flex flex-col h-screen bg-white dark:bg-[#151517] pb-6 pt-16 lg:pt-6 relative">
       {(() => {
         const messages = currentChat?.data?.messages;
         const hasMessages = messages && messages.length > 0;
@@ -211,7 +236,7 @@ const ContentArea = () => {
                     </div>
                   </div>
 
-                  <div className="sticky bottom-0 custom-padding bg-white dark:bg-[#212121] z-10">
+                  <div className="sticky bottom-0 custom-padding bg-white dark:bg-[#151517] z-10">
                     {showScrollButton && (
                       <button
                         onClick={scrollToBottom}

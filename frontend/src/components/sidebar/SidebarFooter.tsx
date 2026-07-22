@@ -149,7 +149,7 @@ const SidebarFooter = ({ token, onLogout, onLogin }: SidebarFooterProps) => {
             </button>
 
             {showMenu && (
-              <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl py-1 z-50">
+              <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl mx-2 py-1 z-50">
                 <button
                   onClick={() => {
                     setShowMenu(false);

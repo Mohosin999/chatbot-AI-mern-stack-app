@@ -6,14 +6,15 @@ import React, {
   useCallback,
 } from "react";
 import {
-  FaCircleArrowRight,
   FaPlus,
   FaFilePdf,
   FaXmark,
 } from "react-icons/fa6";
+import { FaArrowAltCircleUp } from "react-icons/fa";
+
 
 export interface ChatInputHandle {
-  focus: () => void;
+  focus: (options?: FocusOptions) => void;
 }
 
 interface SelectedFile {
@@ -120,46 +121,46 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
       }
     };
 
-    useImperativeHandle(ref, () => ({
-      focus: () => textareaRef.current?.focus(),
-    }));
+  useImperativeHandle(ref, () => ({
+    focus: (options?: FocusOptions) => textareaRef.current?.focus(options),
+  }));
 
     const canSend =
       (value.trim().length > 0 || selectedFiles.length > 0) && token;
 
     return (
       <div className="w-full flex flex-col items-center">
-        <div className="relative w-full rounded-full border border-gray-300 bg-white dark:bg-[#303030] dark:border-[#303030] shadow-md group">
-          {selectedFiles.length > 0 && (
-            <div className="flex flex-wrap gap-2 px-3 pt-3 pb-1">
-              {selectedFiles.map((file) => (
-                <div
-                  key={file.id}
-                  className="relative group/file flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-[#3a3a3a] px-2 py-1.5 pr-7 text-xs"
+        {selectedFiles.length > 0 && (
+          <div className="w-full flex flex-wrap gap-1.5 mb-2 px-1">
+            {selectedFiles.map((file) => (
+              <div
+                key={file.id}
+                className="relative group/file flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-[#3a3a3a] px-2 py-1 pr-6 text-xs"
+              >
+                {file.mimeType === "application/pdf" ? (
+                  <FaFilePdf className="text-red-500 shrink-0" size={14} />
+                ) : (
+                  <img
+                    src={file.preview}
+                    alt={file.name}
+                    className="h-6 w-6 rounded object-cover shrink-0"
+                  />
+                )}
+                <span className="max-w-20 truncate text-gray-700 dark:text-gray-300">
+                  {file.name}
+                </span>
+                <button
+                  onClick={() => removeFile(file.id)}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 hidden group-hover/file:flex items-center justify-center h-3.5 w-3.5 rounded-full bg-gray-400 hover:bg-gray-500 text-white"
                 >
-                  {file.mimeType === "application/pdf" ? (
-                    <FaFilePdf className="text-red-500 shrink-0" size={14} />
-                  ) : (
-                    <img
-                      src={file.preview}
-                      alt={file.name}
-                      className="h-6 w-6 rounded object-cover shrink-0"
-                    />
-                  )}
-                  <span className="max-w-24 truncate text-gray-700 dark:text-gray-300">
-                    {file.name}
-                  </span>
-                  <button
-                    onClick={() => removeFile(file.id)}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 hidden group-hover/file:flex items-center justify-center h-4 w-4 rounded-full bg-gray-400 hover:bg-gray-500 text-white"
-                  >
-                    <FaXmark size={8} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+                  <FaXmark size={7} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
+        <div className="relative w-full rounded-full border border-gray-300 bg-white dark:bg-[#303030] dark:border-[#303030] shadow-md group">
           <div className="flex items-center">
             <button
               onClick={() => fileInputRef.current?.click()}
@@ -207,17 +208,19 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                   onClick={onStop}
                   className="h-8 w-8 flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 active:scale-95 transition-all cursor-pointer"
                 >
-                  <span className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                  <span className="text-base font-bold text-gray-700 dark:text-gray-200">
                     ■
                   </span>
                 </button>
-              ) : canSend ? (
-                <FaCircleArrowRight
-                  onClick={sendMessage}
-                  className="h-7 w-7 cursor-pointer active:scale-105 transition-transform duration-150 text-gray-900 dark:text-gray-100 hover:text-gray-800 hover:dark:text-gray-300"
-                />
               ) : (
-                <div className="h-8 w-8" />
+                <FaArrowAltCircleUp
+                  onClick={canSend ? sendMessage : undefined}
+                  className={`h-7 w-7 active:scale-105 transition-all duration-150 ${
+                    canSend
+                      ? "cursor-pointer text-gray-900 dark:text-gray-100 hover:text-gray-800 hover:dark:text-gray-300"
+                      : "text-gray-300 dark:text-gray-600"
+                  }`}
+                />
               )}
             </div>
           </div>
